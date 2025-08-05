@@ -1,7 +1,7 @@
 $('.search-button').on('click', function () {
     
     $.ajax({
-        url: 'http://www.omdbapi.com/?apikey=e99e9261&s='+$('.input-keyword').val(), //parameter s yang artinya search digunakan untuk mencari judul film, bisa juga menggunakan parameter i untuk mencari berdasarkan id film
+        url: 'https://www.omdbapi.com/?apikey=e99e9261&s='+$('.input-keyword').val(), //parameter s yang artinya search digunakan untuk mencari judul film, bisa juga menggunakan parameter i untuk mencari berdasarkan id film
         success: result => {
             const movies = result.Search;
             let cards = '';
@@ -14,7 +14,7 @@ $('.search-button').on('click', function () {
             //ketika tombol show detail di klik
             $('.modal-detail-button').on('click', function () {
                 $.ajax({
-                    url: 'http://www.omdbapi.com/?apikey=e99e9261&i='+ $(this).data('imdbid'), //menggunakan data attribute untuk mengambil imdbid 
+                    url: 'https://www.omdbapi.com/?apikey=e99e9261&i='+ $(this).data('imdbid'), //menggunakan data attribute untuk mengambil imdbid 
                     success : m => {
                         const movieDetail = showMovieDetail(m);
     
