@@ -14,7 +14,7 @@ searchButton.addEventListener('click', async function(){
 
 //for film
 function getMovies(keyword){
-    return fetch('http://www.omdbapi.com/?apikey=e99e9261&s='+keyword) //fetch hanya akan reject ketika networknya error
+    return fetch('https://www.omdbapi.com/?apikey=e99e9261&s='+keyword) //fetch hanya akan reject ketika networknya error
         
         .then(response => { //1. menangkap error pada API key yang eror / halaman yang salah ex : htpp
             console.log(response); // cek isi response
@@ -62,7 +62,7 @@ document.addEventListener('click', async function (e){
 
 //for detail
 function getMovieDetail(imdbid){
-    return fetch('http://www.omdbapi.com/?apikey=e9e9261&i='+imdbid)
+    return fetch('https://www.omdbapi.com/?apikey=e9e9261&i='+imdbid)
         .then(response => {
             console.log(response)
             if(!response.ok){
