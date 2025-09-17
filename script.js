@@ -1,38 +1,83 @@
-$('.search-button').on('click', function () {
-    
-    $.ajax({
-        url: 'https://www.omdbapi.com/?apikey=e99e9261&s='+$('.input-keyword').val(), //parameter s yang artinya search digunakan untuk mencari judul film, bisa juga menggunakan parameter i untuk mencari berdasarkan id film
-        success: result => {
-            const movies = result.Search;
-            let cards = '';
-            movies.forEach(m => {
-                cards += showCard(m);
-            });
-            $('.movie-container').html(cards);
-    
-    
-            //ketika tombol show detail di klik
-            $('.modal-detail-button').on('click', function () {
-                $.ajax({
-                    url: 'https://www.omdbapi.com/?apikey=e99e9261&i='+ $(this).data('imdbid'), //menggunakan data attribute untuk mengambil imdbid 
-                    success : m => {
-                        const movieDetail = showMovieDetail(m);
-    
-                        //tampilkan di modal
-                        $('.modal-body').html(movieDetail);
-                    },
-                    error: (e) => {
-                        console.error(e.responseText);
-                    }
-                });
-            });
-        },
-        error:(e)=>{
-            console.error(e.responseText);
-        }
-    });
+//Fetch Refactor
+const searchButton = document.querySelector('.search-button');
+searchButton.addEventListener('click', async function(){ 
+    try{
+        const inputKeyword = document.querySelector('.input-keyword');
+        const movies = await getMovies(inputKeyword.value);
+        updateUI(movies);
+    }catch(e){
+        document.querySelector('.movie-container').innerHTML =`<div class="alert alert-danger" role="alert">${e} <span class="badge bg-secondary"><h5>Error Cuy</h5></span> </div>`;
+    }
 });
 
+//Ketika kita menggunakan fetch problemnya adalah error yang ditangkap oleh fetch itu hanya error yang ada pada networknya / urlnya
+
+//for film
+function getMovies(keyword){
+    return fetch('http://www.omdbapi.com/?apikey=e99e9261&s='+keyword) //fetch hanya akan reject ketika networknya error
+        
+        .then(response => { //1. menangkap error pada API key yang eror / halaman yang salah ex : htpp
+            console.log(response); // cek isi response
+            if(!response.ok){ //jika respon not ok, !ok
+                throw new Error(response.statusText); //melempar error yang akan ditangkap oleh catch
+            }
+            return response.json();
+        })  //response.json() buat method ini hanya akan jalan ketika API key (datanya) nya benar / ketika filmnya ada / ketika ada yang diketikkan di kolom pencarian, jadi buat kondisinya dulu
+
+        .then(response => { //2. menangkap error pada pencarian yang kosong / pencarian yang tidak ada
+            console.log(response); //cek isi response
+            if(response.Response === "False"){
+                throw new Error(response.Error);
+            }
+            return response.Search; //jika pencarian ada nilainya maka akan mengembalikan object Search
+            
+        });
+    }
+
+
+function updateUI(movies){
+    //console.log(movies)
+    let cards = '';
+    movies.forEach(m => cards += showCard(m));
+    const movieContainer = document.querySelector('.movie-container');
+    movieContainer.innerHTML = cards;
+}
+
+
+
+
+//Event binding for detail
+document.addEventListener('click', async function (e){
+    if(e.target.classList.contains('modal-detail-button')){
+        try {
+            const imdbid = e.target.dataset.imdbid;
+            const movieDetail = await getMovieDetail(imdbid);
+            updateUIDetail(movieDetail);
+        } catch (err) {
+            document.querySelector('.modal-body').innerHTML =`<div class="alert alert-danger" role="alert">${err} <span class="badge bg-secondary"><h5>Error Cuy</h5></span> </div>`;
+        }
+        
+    }
+})
+
+//for detail
+function getMovieDetail(imdbid){
+    return fetch('http://www.omdbapi.com/?apikey=e9e9261&i='+imdbid)
+        .then(response => {
+            console.log(response)
+            if(!response.ok){
+                throw new Error(response.statusText);
+            }
+            return response.json();
+        })
+        .then(m => m);
+}
+
+function updateUIDetail(m){
+    const movieDetail = showMovieDetail(m);
+    const modalBody = document.querySelector('.modal-body');
+    modalBody.innerHTML = movieDetail;
+}
 
 
 
@@ -73,6 +118,3 @@ function showMovieDetail(m) {
 
 
 
-
-//dengan menggunakan callback, mungkin aja kalian masuk ke dalam callback hell, untuk menghindari hal itu, kalian bisa menggunakan promise, atau async await, atau generator function
-//jadi callback itu adalah sebuah function yang dipanggil ketika proses asynchronous selesai
